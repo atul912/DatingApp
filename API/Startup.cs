@@ -27,6 +27,8 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // ordering of calling these function from services is not neccessary in this function 'ConfigureServices'
+
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
@@ -36,11 +38,15 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // ordering of calling these function from app is very important in this function 'Configure'
+            // whichever order we haved called the below functions in should be in this same order 
+
             if (env.IsDevelopment())
             {
                 // if application encounters problems then we use the developer exception page
@@ -54,6 +60,9 @@ namespace API
 
             // It routing action because we were able to go from our browser, the WeatherForecast endpoint and get to our WeatherForecast controller
             app.UseRouting();
+
+            // here x is defined as cors policy
+            app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
 
             app.UseAuthorization();
 
